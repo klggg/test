@@ -1,0 +1,1267 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>东方明医平台 - 大健康产业赋能平台</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: #f5f7fa;
+            color: #333;
+            overflow: hidden;
+            height: 100vh;
+            touch-action: pan-y;
+        }
+        
+        .ppt-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .slides-container {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            padding: 20px 15px;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: transform 0.5s ease, opacity 0.5s ease;
+            background: linear-gradient(135deg, #f8fafc 0%, #eef2f7 100%);
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .slide.active {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        
+        .slide.prev {
+            transform: translateX(-100%);
+        }
+        
+        .slide-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e0e6ed;
+            flex-wrap: wrap;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            margin-right: 15px;
+            margin-bottom: 5px;
+        }
+        
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #2c8c4a 0%, #4caf50 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+        
+        .logo-text {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1a5632;
+            letter-spacing: 0.5px;
+        }
+        
+        .slide-title {
+            font-size: 24px;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-weight: 700;
+            position: relative;
+            padding-bottom: 10px;
+            line-height: 1.3;
+        }
+        
+        .slide-title:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, #2c8c4a, #4caf50);
+            border-radius: 2px;
+        }
+        
+        .slide-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+        }
+        
+        .content-text {
+            font-size: 16px;
+            line-height: 1.5;
+            margin-bottom: 15px;
+            color: #444;
+        }
+        
+        .highlight {
+            color: #2c8c4a;
+            font-weight: 600;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+            border-left: 4px solid #4caf50;
+            transition: transform 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-3px);
+        }
+        
+        .stat-title {
+            font-size: 16px;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #2c8c4a;
+            margin-bottom: 5px;
+        }
+        
+        .stat-desc {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.4;
+        }
+        
+        .chart-container {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+            margin: 15px 0;
+            height: 250px;
+        }
+        
+        .features-list {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+            margin: 15px 0;
+        }
+        
+        .feature-item {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.06);
+            display: flex;
+            align-items: flex-start;
+        }
+        
+        .feature-icon {
+            background: #e8f5e9;
+            color: #2c8c4a;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+        
+        .feature-text {
+            flex: 1;
+        }
+        
+        .feature-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        
+        .feature-desc {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.4;
+        }
+        
+        .table-container {
+            overflow-x: auto;
+            margin: 15px 0;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 500px;
+        }
+        
+        th {
+            background: #2c8c4a;
+            color: white;
+            font-weight: 600;
+            padding: 12px 10px;
+            text-align: left;
+            font-size: 14px;
+        }
+        
+        td {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            color: #444;
+            font-size: 13px;
+        }
+        
+        tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+        
+        tr:hover {
+            background: #f0f7f0;
+        }
+        
+        .product-showcase {
+            display: flex;
+            flex-direction: column;
+            margin: 20px 0;
+            gap: 20px;
+        }
+        
+        .product-image {
+            background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+            border-radius: 12px;
+            height: 180px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 6px 12px rgba(44, 140, 74, 0.15);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .product-details {
+            width: 100%;
+        }
+        
+        .product-title {
+            font-size: 20px;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+        
+        .product-features {
+            list-style-type: none;
+        }
+        
+        .product-features li {
+            padding: 8px 0;
+            font-size: 15px;
+            color: #444;
+            border-bottom: 1px dashed #ddd;
+        }
+        
+        .product-features li:last-child {
+            border-bottom: none;
+        }
+        
+        .product-features li i {
+            color: #2c8c4a;
+            margin-right: 8px;
+        }
+        
+        .partner-types {
+            display: flex;
+            flex-direction: column;
+            margin: 20px 0;
+            gap: 15px;
+        }
+        
+        .partner-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+        
+        .partner-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .partner-icon {
+            font-size: 32px;
+            color: #2c8c4a;
+            margin-bottom: 15px;
+        }
+        
+        .partner-title {
+            font-size: 18px;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        .partner-desc {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.4;
+        }
+        
+        /* 移动端导航 */
+        .mobile-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: white;
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 15px;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+        }
+        
+        .nav-btn {
+            background: #2c8c4a;
+            color: white;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            cursor: pointer;
+            box-shadow: 0 3px 6px rgba(44, 140, 74, 0.3);
+            transition: all 0.3s ease;
+            border: none;
+            -webkit-appearance: none;
+            touch-action: manipulation;
+        }
+        
+        .nav-btn:active {
+            background: #1a5632;
+            transform: scale(0.95);
+        }
+        
+        .nav-btn.disabled {
+            background: #cccccc;
+            box-shadow: none;
+        }
+        
+        .slide-counter {
+            color: #666;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .progress-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #2c8c4a, #4caf50);
+            width: 0%;
+            transition: width 0.5s ease;
+            z-index: 100;
+        }
+        
+        .footer {
+            padding: 15px;
+            text-align: center;
+            color: #666;
+            font-size: 12px;
+            background: #f0f7f0;
+            border-top: 1px solid #ddd;
+            display: none;
+        }
+        
+        .page-number {
+            position: absolute;
+            bottom: 70px;
+            left: 15px;
+            color: #888;
+            font-size: 14px;
+            z-index: 10;
+        }
+        
+        /* 滑动指示器 */
+        .swipe-hint {
+            position: fixed;
+            bottom: 80px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            color: #888;
+            font-size: 12px;
+            z-index: 10;
+            animation: pulse 2s infinite;
+            display: none;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
+        
+        /* 图片样式 */
+        .image-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #2c8c4a;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .image-placeholder i {
+            font-size: 50px;
+            margin-bottom: 15px;
+        }
+        
+        .image-gallery {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin: 15px 0;
+        }
+        
+        .image-item {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+        }
+        
+        .image-caption {
+            padding: 10px 15px;
+            font-size: 14px;
+            color: #666;
+            border-top: 1px solid #eee;
+        }
+        
+        /* 桌面端样式 */
+        @media (min-width: 768px) {
+            .slide {
+                padding: 30px 40px;
+            }
+            
+            .slide-title {
+                font-size: 32px;
+            }
+            
+            .content-text {
+                font-size: 18px;
+            }
+            
+            .logo-text {
+                font-size: 22px;
+            }
+            
+            .logo-icon {
+                width: 50px;
+                height: 50px;
+                font-size: 24px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 20px;
+            }
+            
+            .features-list {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 20px;
+            }
+            
+            .product-showcase {
+                flex-direction: row;
+                height: 250px;
+            }
+            
+            .partner-types {
+                flex-direction: row;
+            }
+            
+            .mobile-nav {
+                display: none;
+            }
+            
+            .footer {
+                display: block;
+            }
+            
+            .swipe-hint {
+                display: block;
+            }
+            
+            .page-number {
+                bottom: 30px;
+                left: 30px;
+            }
+            
+            .image-gallery {
+                flex-direction: row;
+                justify-content: space-between;
+            }
+            
+            .image-item {
+                width: 32%;
+            }
+        }
+        
+        @media (min-width: 1024px) {
+            .slide {
+                padding: 40px 60px;
+            }
+            
+            .slide-title {
+                font-size: 36px;
+            }
+        }
+        
+        /* 横屏优化 */
+        @media (orientation: landscape) and (max-height: 500px) {
+            .slide {
+                padding: 15px 20px;
+            }
+            
+            .slide-title {
+                font-size: 20px;
+                margin-bottom: 10px;
+            }
+            
+            .content-text {
+                font-size: 14px;
+                margin-bottom: 10px;
+            }
+            
+            .chart-container {
+                height: 180px;
+                margin: 10px 0;
+            }
+            
+            .page-number {
+                bottom: 60px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="ppt-container">
+        <div class="progress-bar" id="progressBar"></div>
+        
+        <!-- 滑动提示 -->
+        <div class="swipe-hint" id="swipeHint">
+            <i class="fas fa-arrows-left-right"></i> 左右滑动或使用下方按钮翻页
+        </div>
+        
+        <div class="slides-container" id="slidesContainer">
+            <!-- 第1页：封面 -->
+            <div class="slide active" id="slide1">
+                <div class="slide-header">
+                    <div class="logo">
+                        <div class="logo-icon">东</div>
+                        <div class="logo-text">东方明医大健康平台</div>
+                    </div>
+                </div>
+                
+                <div class="slide-content" style="justify-content: center; align-items: center; text-align: center;">
+                    <h1 class="slide-title" style="font-size: 28px; text-align: center; border: none; margin-bottom: 15px;">
+                        赋能大健康产业
+                    </h1>
+                    <div class="content-text" style="max-width: 100%; font-size: 18px; margin-bottom: 30px;">
+                        以平台之力，聚产业之能，筑健康长城
+                    </div>
+                    
+                    <div style="max-width: 100%; margin: 0 auto;">
+                        <div class="content-text" style="text-align: left; background: rgba(255, 255, 255, 0.9); padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);">
+                            <h3 style="color: #2c8c4a; margin-bottom: 10px; font-size: 18px;">核心逻辑主线</h3>
+                            <p style="margin-bottom: 10px; font-size: 15px;"><span class="highlight">战略：</span> 为何做（产业趋势+政策导向+品牌文化+规模效应+解决痛点）</p>
+                            <p style="margin-bottom: 10px; font-size: 15px;"><span class="highlight">工具：</span> 用什么做（场导仪：链接人与健康的核心载体）</p>
+                            <p style="font-size: 15px;"><span class="highlight">生态：</span> 怎么做（开放平台生态，聚合全行业优质资源）</p>
+                        </div>
+                    </div>
+                    
+                    <div class="page-number">1 / 7</div>
+                </div>
+            </div>
+            
+            <!-- 第2页：为何做 - 产业趋势 -->
+            <div class="slide" id="slide2">
+                <div class="slide-header">
+                    <div class="logo">
+                        <div class="logo-icon">东</div>
+                        <div class="logo-text">东方明医大健康平台</div>
+                    </div>
+                    <div style="font-size: 16px; color: #2c8c4a; font-weight: 500;">锚定大健康万亿赛道</div>
+                </div>
+                
+                <h1 class="slide-title">产业趋势：万亿市场待挖掘</h1>
+                
+                <div class="slide-content">
+                    <div class="content-text">
+                        全球健康产业规模超20万亿美元，中国大健康市场预计2025年将突破<span class="highlight">15万亿元</span>，进入"全民健康"消费升级时代。
+                    </div>
+                    
+                    <div class="chart-container">
+                        <canvas id="marketChart"></canvas>
+                    </div>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-title">万亿市场待挖掘</div>
+                            <div class="stat-value">15万亿+</div>
+                            <div class="stat-desc">2025年中国大健康市场规模预测，年增长率超过10%</div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-title">健康需求成刚需</div>
+                            <div class="stat-value">89%</div>
+                            <div class="stat-desc">消费者从"治病"转向"预防+调理+康养"的健康需求占比</div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-title">政策全力支持</div>
+                            <div class="stat-value">100+</div>
+                            <div class="stat-desc">国家及地方出台支持大健康产业发展的政策文件数量</div>
+                        </div>
+                    </div>
+                    
+                    <div class="content-text">
+                        <h3 style="color: #2c3e50; margin-bottom: 10px; font-size: 18px;">关键洞察</h3>
+                        <p>大健康的核心是"贴近生活的健康守护"，人们对"水、阳光、空气、食物"等基础生命要素的健康需求，尚未被充分满足，这是万亿市场的核心入口。</p>
+                    </div>
+                    
+                    <div class="page-number">2 / 7</div>
+                </div>
+            </div>
+            
+            <!-- 第3页：解决问题 -->
+            <div class="slide" id="slide3">
+                <div class="slide-header">
+                    <div class="logo">
+                        <div class="logo-icon">东</div>
+                        <div class="logo-text">东方明医大健康平台</div>
+                    </div>
+                    <div style="font-size: 16px; color: #2c8c4a; font-weight: 500;">直击行业与用户痛点</div>
+                </div>
+                
+                <h1 class="slide-title">解决行业与用户双端痛点</h1>
+                
+                <div class="slide-content">
+                    <div class="content-text">
+                        大健康行业存在"小、散、乱"的痛点，东方明医平台通过资源整合、技术赋能和标准化建设，提供系统性解决方案。
+                    </div>
+                    
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>痛点类型</th>
+                                    <th>具体问题</th>
+                                    <th>平台解决方案</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>从业者痛点</strong></td>
+                                    <td>缺场地、缺客源、缺标准化体系，优质技术/产品难落地</td>
+                                    <td>提供共享场地、AI获客工具、标准化服务流程，开放供应链与专家资源</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>消费者痛点</strong></td>
+                                    <td>健康服务贵、选择难、缺乏日常守护工具，对基础健康要素无把控</td>
+                                    <td>推出高性价比家庭健康产品，提供AI体检、名医咨询等服务，构建"预防-调理"闭环</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>行业痛点</strong></td>
+                                    <td>资源分散、标准缺失、传统医道失传，科技与医道融合不足</td>
+                                    <td>建立行业标准，挖掘传承民间秘术，用AI、基因技术赋能传统医道</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="content-text">
+                        <h3 style="color: #2c3e50; margin-bottom: 10px; font-size: 18px;">规模目标</h3>
+                        <div style="display: flex; justify-content: space-between; margin-top: 15px;">
+                            <div style="text-align: center; flex: 1;">
+                                <div style="font-size: 20px; font-weight: 700; color: #2c8c4a;">3年</div>
+                                <div style="font-size: 14px; color: #666;">覆盖50城</div>
+                            </div>
+                            <div style="text-align: center; flex: 1;">
+                                <div style="font-size: 20px; font-weight: 700; color: #2c8c4a;">5年</div>
+                                <div style="font-size: 14px; color: #666;">服务2亿+人群</div>
+                            </div>
+                            <div style="text-align: center; flex: 1;">
+                                <div style="font-size: 20px; font-weight: 700; color: #2c8c4a;">10年</div>
+                                <div style="font-size: 14px; color: #666;">建成全球生态共同体</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="page-number">3 / 7</div>
+                </div>
+            </div>
+            
+            <!-- 第4页：核心工具 - 场导仪 -->
+            <div class="slide" id="slide4">
+                <div class="slide-header">
+                    <div class="logo">
+                        <div class="logo-icon">东</div>
+                        <div class="logo-text">东方明医大健康平台</div>
+                    </div>
+                    <div style="font-size: 16px; color: #2c8c4a; font-weight: 500;">开挖大健康宝藏的"钥匙"</div>
+                </div>
+                
+                <h1 class="slide-title">核心工具：场导仪</h1>
+                
+                <div class="slide-content">
+                    <div class="content-text">
+                        <span class="highlight">场导仪</span>是链接人与健康的核心载体，从生命刚需"水"切入，打造人人用得起、用得上的健康工具，成为用户进入平台生态的"门票"。
+                    </div>
+                    
+                    <!-- 产品图片展示 -->
+                    <div class="image-gallery">
+                        <div class="image-item">
+                            <div class="product-image">
+                                <div class="image-placeholder">
+                                    <i class="fas fa-tint"></i>
+                                    <div>场导仪产品图1</div>
+                                </div>
+                            </div>
+                            <div class="image-caption">小巧便携设计</div>
+                        </div>
+                        
+                        <div class="image-item">
+                            <div class="product-image">
+                                <div class="image-placeholder">
+                                    <i class="fas fa-water"></i>
+                                    <div>场导仪产品图2</div>
+                                </div>
+                            </div>
+                            <div class="image-caption">7.6赫兹低频共振水</div>
+                        </div>
+                        
+                        <div class="image-item">
+                            <div class="product-image">
+                                <div class="image-placeholder">
+                                    <i class="fas fa-home"></i>
+                                    <div>场导仪产品图3</div>
+                                </div>
+                            </div>
+                            <div class="image-caption">家庭健康守护</div>
+                        </div>
+                    </div>
+                    
+                    <div class="product-details">
+                        <h3 class="product-title">为何选择"水"为切入点？</h3>
+                        <ul class="product-features">
+                            <li><i class="fas fa-check-circle"></i> <strong>生命刚需：</strong> 水是生命四大刚需中最基础、最易被忽视的健康载体</li>
+                            <li><i class="fas fa-check-circle"></i> <strong>市场空白：</strong> 优质健康水价格高、获取难，家庭日常健康用水需求未被满足</li>
+                            <li><i class="fas fa-check-circle"></i> <strong>平台逻辑：</strong> 通过一款产品让用户走进平台生态，形成深度链接</li>
+                        </ul>
+                        
+                        <h3 style="margin-top: 20px; color: #2c3e50; font-size: 18px;">核心优势</h3>
+                        <div style="display: flex; margin-top: 10px; flex-wrap: wrap;">
+                            <div style="background: #e8f5e9; padding: 8px 12px; border-radius: 16px; margin-right: 8px; margin-bottom: 8px; font-size: 13px;">
+                                <i class="fas fa-compress-alt"></i> 小巧便携
+                            </div>
+                            <div style="background: #e8f5e9; padding: 8px 12px; border-radius: 16px; margin-right: 8px; margin-bottom: 8px; font-size: 13px;">
+                                <i class="fas fa-bolt"></i> 功能强大
+                            </div>
+                            <div style="background: #e8f5e9; padding: 8px 12px; border-radius: 16px; margin-right: 8px; margin-bottom: 8px; font-size: 13px;">
+                                <i class="fas fa-dollar-sign"></i> 成本可控
+                            </div>
+                            <div style="background: #e8f5e9; padding: 8px 12px; border-radius: 16px; margin-bottom: 8px; font-size: 13px;">
+                                <i class="fas fa-link"></i> 生态入口
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="page-number">4 / 7</div>
+                </div>
+            </div>
+            
+            <!-- 第5页：平台生态 -->
+            <div class="slide" id="slide5">
+                <div class="slide-header">
+                    <div class="logo">
+                        <div class="logo-icon">东</div>
+                        <div class="logo-text">东方明医大健康平台</div>
+                    </div>
+                    <div style="font-size: 16px; color: #2c8c4a; font-weight: 500;">开放聚合全行业优质资源</div>
+                </div>
+                
+                <h1 class="slide-title">平台生态：不止于一款产品</h1>
+                
+                <div class="slide-content">
+                    <div class="content-text">
+                        采用"1+N"模式，以场导仪为入口，聚合N类优质资源，构建开放、共赢的大健康产业生态系统。
+                    </div>
+                    
+                    <div style="display: flex; flex-direction: column; margin: 20px 0; gap: 15px;">
+                        <div style="background: #2c8c4a; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px; font-weight: 700; box-shadow: 0 4px 8px rgba(44, 140, 74, 0.3); padding: 20px;">
+                            <div style="text-align: center;">
+                                <div style="font-size: 36px; margin-bottom: 8px;">1</div>
+                                <div>场导仪</div>
+                                <div style="font-size: 14px; margin-top: 5px;">核心入口</div>
+                            </div>
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                            <div style="background: white; border-radius: 8px; padding: 12px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08); display: flex; flex-direction: column; align-items: center; text-align: center;">
+                                <div style="font-size: 24px; color: #2c8c4a; margin-bottom: 8px;"><i class="fas fa-pills"></i></div>
+                                <div style="font-weight: 700; font-size: 14px; color: #2c3e50;">健康产品</div>
+                            </div>
+                            
+                            <div style="background: white; border-radius: 8px; padding: 12px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08); display: flex; flex-direction: column; align-items: center; text-align: center;">
+                                <div style="font-size: 24px; color: #2c8c4a; margin-bottom: 8px;"><i class="fas fa-hospital"></i></div>
+                                <div style="font-weight: 700; font-size: 14px; color: #2c3e50;">服务机构</div>
+                            </div>
+                            
+                            <div style="background: white; border-radius: 8px; padding: 12px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08); display: flex; flex-direction: column; align-items: center; text-align: center;">
+                                <div style="font-size: 24px; color: #2c8c4a; margin-bottom: 8px;"><i class="fas fa-user-md"></i></div>
+                                <div style="font-weight: 700; font-size: 14px; color: #2c3e50;">专业人才</div>
+                            </div>
+                            
+                            <div style="background: white; border-radius: 8px; padding: 12px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08); display: flex; flex-direction: column; align-items: center; text-align: center;">
+                                <div style="font-size: 24px; color: #2c8c4a; margin-bottom: 8px;"><i class="fas fa-cogs"></i></div>
+                                <div style="font-weight: 700; font-size: 14px; color: #2c3e50;">技术支持</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="content-text">
+                        <h3 style="color: #2c3e50; margin-bottom: 12px; font-size: 18px;">生态赋能：三大核心支持</h3>
+                        <div style="display: flex; flex-direction: column; gap: 15px; margin-top: 15px;">
+                            <div style="background: #f0f7f0; padding: 15px; border-radius: 8px;">
+                                <h4 style="color: #2c8c4a; margin-bottom: 8px; font-size: 16px;"><i class="fas fa-boxes"></i> 资源赋能</h4>
+                                <p style="color: #666; font-size: 13px;">共享广州500㎡办公基地、全国AI智养阁/国医馆网络，提供名医培训、技术指导</p>
+                            </div>
+                            <div style="background: #f0f7f0; padding: 15px; border-radius: 8px;">
+                                <h4 style="color: #2c8c4a; margin-bottom: 8px; font-size: 16px;"><i class="fas fa-chart-line"></i> 运营赋能</h4>
+                                <p style="color: #666; font-size: 13px;">提供AI获客系统、社群运营工具、标准化服务手册，降低合作伙伴运营成本</p>
+                            </div>
+                            <div style="background: #f0f7f0; padding: 15px; border-radius: 8px;">
+                                <h4 style="color: #2c8c4a; margin-bottom: 8px; font-size: 16px;"><i class="fas fa-hand-holding-usd"></i> 利益赋能</h4>
+                                <p style="color: #666; font-size: 13px;">采用"分销分成+区域补贴"模式，让合作伙伴"轻投入、高回报"</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="page-number">5 / 7</div>
+                </div>
+            </div>
+            
+            <!-- 第6页：合作邀约 -->
+            <div class="slide" id="slide6">
+                <div class="slide-header">
+                    <div class="logo">
+                        <div class="logo-icon">东</div>
+                        <div class="logo-text">东方明医大健康平台</div>
+                    </div>
+                    <div style="font-size: 16px; color: #2c8c4a; font-weight: 500;">诚邀天下同仁，共挖大健康万亿宝藏</div>
+                </div>
+                
+                <h1 class="slide-title">合作邀约</h1>
+                
+                <div class="slide-content">
+                    <div class="content-text">
+                        大健康的宝藏，不是靠一个人挖，而是靠一群人聚。东方明医愿做"藏宝图"与"工具箱"，与天下同仁共赴光明！
+                    </div>
+                    
+                    <div class="partner-types">
+                        <div class="partner-card">
+                            <div class="partner-icon"><i class="fas fa-box-open"></i></div>
+                            <div class="partner-title">产品伙伴</div>
+                            <div class="partner-desc">有优质健康产品（如空气净化器、有机食品、家庭理疗器械）的品牌/厂家，共享平台流量与渠道</div>
+                        </div>
+                        
+                        <div class="partner-card">
+                            <div class="partner-icon"><i class="fas fa-hands-helping"></i></div>
+                            <div class="partner-title">服务伙伴</div>
+                            <div class="partner-desc">个体诊所、理疗馆、养生机构等，接入平台标准化体系，共享专家与客源</div>
+                        </div>
+                        
+                        <div class="partner-card">
+                            <div class="partner-icon"><i class="fas fa-rocket"></i></div>
+                            <div class="partner-title">创业伙伴</div>
+                            <div class="partner-desc">想进入大健康赛道的个人，可从场导仪分销、AI智养阁运营等低门槛项目切入，平台全程扶持</div>
+                        </div>
+                    </div>
+                    
+                    <div class="content-text" style="margin-top: 20px;">
+                        <h3 style="color: #2c3e50; margin-bottom: 12px; font-size: 18px;">合作优势</h3>
+                        <div class="stats-grid" style="margin-top: 15px;">
+                            <div class="stat-card">
+                                <div class="stat-title">低风险</div>
+                                <div class="stat-value">零风险承诺</div>
+                                <div class="stat-desc">提供产品试销不满意可退换、共享场地降低成本等保障</div>
+                            </div>
+                            
+                            <div class="stat-card">
+                                <div class="stat-title">高回报</div>
+                                <div class="stat-value">30%佣金</div>
+                                <div class="stat-desc">场导仪分销享30%佣金，区域代理享2%-3%补贴，依托平台规模效应实现高收益</div>
+                            </div>
+                            
+                            <div class="stat-card">
+                                <div class="stat-title">强后盾</div>
+                                <div class="stat-value">全方位支持</div>
+                                <div class="stat-desc">名医团+科技团队+政策支持，解决"缺技术、缺资源、缺信任"问题</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="page-number">6 / 7</div>
+                </div>
+            </div>
+            
+            <!-- 第7页：结束页 -->
+            <div class="slide" id="slide7">
+                <div class="slide-header">
+                    <div class="logo">
+                        <div class="logo-icon">东</div>
+                        <div class="logo-text">东方明医大健康平台</div>
+                    </div>
+                </div>
+                
+                <div class="slide-content" style="justify-content: center; align-items: center; text-align: center;">
+                    <div style="max-width: 100%;">
+                        <h1 class="slide-title" style="text-align: center; border: none; margin-bottom: 20px; font-size: 22px;">
+                            融千古医道，聚天下明医，筑无疾之天下
+                        </h1>
+                        
+                        <div class="content-text" style="margin-bottom: 30px; font-size: 18px;">
+                            健康不是"奢侈品"，而是"日用品"。东方明医平台致力于通过现代科技让优质健康服务/产品触达每一个家庭。
+                        </div>
+                        
+                        <div style="display: flex; justify-content: center; gap: 20px; margin-bottom: 30px; flex-wrap: wrap;">
+                            <div style="text-align: center;">
+                                <div style="font-size: 28px; font-weight: 700; color: #2c8c4a;">100万家庭</div>
+                                <div style="font-size: 15px; color: #666;">短期目标：场导仪成为家庭健康标配</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 28px; font-weight: 700; color: #2c8c4a;">2000+企业</div>
+                                <div style="font-size: 15px; color: #666;">中期目标：聚合健康企业形成全链路平台</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 28px; font-weight: 700; color: #2c8c4a;">天下无疾</div>
+                                <div style="font-size: 15px; color: #666;">长期愿景：传统医道与现代科技共筑健康长城</div>
+                            </div>
+                        </div>
+                        
+                        <div class="content-text" style="font-size: 20px; font-weight: 600; color: #2c8c4a; margin-bottom: 30px;">
+                            加入东方明医联盟，共享万亿市场
+                        </div>
+                        
+                        <div style="font-size: 15px; color: #666; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);">
+                            <p style="margin-bottom: 10px;"><i class="fas fa-calendar-alt"></i> 2025年12月3日</p>
+                            <p><i class="fas fa-map-marker-alt"></i> 东方明医运营中心</p>
+                        </div>
+                    </div>
+                    
+                    <div class="page-number">7 / 7</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 移动端底部导航 -->
+        <div class="mobile-nav">
+            <button class="nav-btn" id="mobilePrevBtn">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <div class="slide-counter" id="mobileSlideCounter">1 / 7</div>
+            <button class="nav-btn" id="mobileNextBtn">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+        
+        <!-- 桌面端底部信息 -->
+        <div class="footer">
+            东方明医大健康平台 | 赋能大健康产业 | 使用键盘左右方向键翻页
+        </div>
+    </div>
+
+    <script>
+        // 幻灯片管理
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+        let currentSlide = 0;
+        const progressBar = document.getElementById('progressBar');
+        const slideCounter = document.getElementById('mobileSlideCounter');
+        
+        // 初始化
+        updateProgress();
+        initCharts();
+        setupTouchEvents();
+        
+        // 移动端按钮事件
+        document.getElementById('mobilePrevBtn').addEventListener('click', goToPrevSlide);
+        document.getElementById('mobileNextBtn').addEventListener('click', goToNextSlide);
+        
+        // 键盘导航（桌面端）
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowLeft') {
+                goToPrevSlide();
+            } else if (e.key === 'ArrowRight') {
+                goToNextSlide();
+            }
+        });
+        
+        // 上一页函数
+        function goToPrevSlide() {
+            if (currentSlide > 0) {
+                slides[currentSlide].classList.remove('active');
+                slides[currentSlide].classList.add('prev');
+                currentSlide--;
+                slides[currentSlide].classList.add('active');
+                slides[currentSlide].classList.remove('prev');
+                updateProgress();
+                updateButtonStates();
+            }
+        }
+        
+        // 下一页函数
+        function goToNextSlide() {
+            if (currentSlide < totalSlides - 1) {
+                slides[currentSlide].classList.remove('active');
+                currentSlide++;
+                slides[currentSlide].classList.add('active');
+                updateProgress();
+                updateButtonStates();
+            }
+        }
+        
+        // 更新进度条和计数器
+        function updateProgress() {
+            const progress = ((currentSlide + 1) / totalSlides) * 100;
+            progressBar.style.width = `${progress}%`;
+            slideCounter.textContent = `${currentSlide + 1} / ${totalSlides}`;
+            
+            // 更新页面底部的页码
+            document.querySelectorAll('.page-number').forEach(el => {
+                el.textContent = `${currentSlide + 1} / ${totalSlides}`;
+            });
+        }
+        
+        // 更新按钮状态
+        function updateButtonStates() {
+            const prevBtn = document.getElementById('mobilePrevBtn');
+            const nextBtn = document.getElementById('mobileNextBtn');
+            
+            if (currentSlide === 0) {
+                prevBtn.classList.add('disabled');
+            } else {
+                prevBtn.classList.remove('disabled');
+            }
+            
+            if (currentSlide === totalSlides - 1) {
+                nextBtn.classList.add('disabled');
+            } else {
+                nextBtn.classList.remove('disabled');
+            }
+        }
+        
+        // 初始化图表
+        function initCharts() {
+            // 大健康市场图表
+            const marketCtx = document.getElementById('marketChart').getContext('2d');
+            
+            // 如果图表已经存在，销毁它
+            if (window.marketChartInstance) {
+                window.marketChartInstance.destroy();
+            }
+            
+            // 根据屏幕大小调整图表字体
+            const isMobile = window.innerWidth < 768;
+            
+            window.marketChartInstance = new Chart(marketCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['2020', '2021', '2022', '2023', '2024', '2025(预测)'],
+                    datasets: [{
+                        label: '中国大健康市场规模 (万亿元)',
+                        data: [8.7, 9.8, 11.2, 12.6, 13.8, 15.2],
+                        backgroundColor: [
+                            'rgba(76, 175, 80, 0.6)',
+                            'rgba(76, 175, 80, 0.6)',
+                            'rgba(76, 175, 80, 0.6)',
+                            'rgba(76, 175, 80, 0.6)',
+                            'rgba(76, 175, 80, 0.6)',
+                            'rgba(44, 140, 74, 0.8)'
+                        ],
+                        borderColor: [
+                            '#4caf50',
+                            '#4caf50',
+                            '#4caf50',
+                            '#4caf50',
+                            '#4caf50',
+                            '#2c8c4a'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: '中国大健康市场规模增长趋势 (2020-2025)',
+                            font: {
+                                size: isMobile ? 14 : 16,
+                                weight: 'bold'
+                            },
+                            color: '#2c3e50'
+                        },
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                font: {
+                                    size: isMobile ? 12 : 14
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: '市场规模 (万亿元)',
+                                font: {
+                                    size: isMobile ? 12 : 14
+                                }
+                            },
+                            ticks: {
+                                font: {
+                                    size: isMobile ? 11 : 13
+                                }
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: '年份',
+                                font: {
+                                    size: isMobile ? 12 : 14
+                                }
+                            },
+                            ticks: {
+                                font: {
+                                    size: isMobile ? 11 : 13
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // 设置触摸事件
+        function setupTouchEvents() {
+            let startX = 0;
+            let endX = 0;
+            
+            document.querySelector('.slides-container').addEventListener('touchstart', function(e) {
+                startX = e.touches[0].clientX;
+            }, {passive: true});
+            
+            document.querySelector('.slides-container').addEventListener('touchmove', function(e) {
+                endX = e.touches[0].clientX;
+            }, {passive: true});
+            
+            document.querySelector('.slides-container').addEventListener('touchend', function() {
+                const threshold = 50; // 滑动阈值
+                const diff = startX - endX;
+                
+                if (Math.abs(diff) > threshold) {
+                    if (diff > 0) {
+                        // 向左滑动，下一页
+                        goToNextSlide();
+                    } else {
+                        // 向右滑动，上一页
+                        goToPrevSlide();
+                    }
+                }
+            }, {passive: true});
+        }
+        
+        // 初始按钮状态
+        updateButtonStates();
+        
+        // 窗口大小变化时重新初始化图表
+        window.addEventListener('resize', function() {
+            initCharts();
+        });
+    </script>
+</body>
+</html>
